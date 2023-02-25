@@ -1,9 +1,6 @@
 const mongoose = require("mongoose");
 const { countConnection } = require("../helpers/checkConnectDb");
 
-const MONGODB_URI =
-  "mongodb+srv://phuocloi11223:0796863758loi@cluster0.0srh0.mongodb.net/tipjs-backend-course?retryWrites=true&w=majority";
-
 const dev = true;
 
 class Database {
@@ -17,7 +14,7 @@ class Database {
       mongoose.set("debug", { color: true });
     }
     mongoose
-      .connect(MONGODB_URI)
+      .connect(process.env.MONGODB_URI)
       .then(() => {
         console.log("Mongodb is connected!");
         countConnection();
