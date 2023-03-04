@@ -1,4 +1,4 @@
-const { generateKeyPairSync, createPublicKey } = require("crypto");
+const crypto = require("crypto");
 const bcrypt = require("bcrypt");
 const Shop = require("../models/shop.model");
 const KeyTokenService = require("./keytoken.service");
@@ -41,38 +41,43 @@ class AccessService {
       }
 
       // generate privatekey and publickey
-      const { privateKey, publicKey } = generateKeyPairSync("rsa", {
-        modulusLength: 4096,
-        publicKeyEncoding: {
-          type: "pkcs1",
-          format: "pem",
-        },
-        privateKeyEncoding: {
-          type: "pkcs1",
-          format: "pem",
-        },
-      });
+      // const { privateKey, publicKey } = generateKeyPairSync("rsa", {
+      //   modulusLength: 4096,
+      //   publicKeyEncoding: {
+      //     type: "pkcs1",
+      //     format: "pem",
+      //   },
+      //   privateKeyEncoding: {
+      //     type: "pkcs1",
+      //     format: "pem",
+      //   },
+      // });
+
+      // simpler way to generate private key and public key
+      const privateKey = crypto.randomBytes(64).toString("hex");
+      const publicKey = crypto.randomBytes(64).toString("hex");
 
       console.log({ privateKey, publicKey });
       // publickey will be convert to string and be stored in collection 'Keys'
-      const publicKeyString = await KeyTokenService.createKeyToken({
+      const keyStore = await KeyTokenService.createKeyToken({
         shop: newShop._id,
         publicKey,
+        privateKey,
       });
 
-      if (!publicKeyString)
+      if (!keyStore)
         return {
           code: "xxx",
-          message: "publicKeyString Error",
+          message: "keyStore Error",
         };
 
       // reconvert publickey string to publickey object
-      const publicKeyObj = createPublicKey(publicKeyString);
-      console.log("publicKeyPbj::: ", publicKeyObj);
+      // const publicKeyObj = createPublicKey(publicKeyString);
+      // console.log("publicKeyPbj::: ", publicKeyObj);
       const tokens = await generateTokensPair(
         { shop: newShop._id, email },
         privateKey,
-        publicKeyObj
+        publicKey
       );
 
       console.log("Tokens are created:: ", tokens);
