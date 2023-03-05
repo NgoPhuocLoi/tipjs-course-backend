@@ -16,7 +16,6 @@ class AccessService {
     try {
       // check the shop existed ?
       const holderShop = await Shop.findOne({ email }).lean();
-      console.log({ holderShop });
       if (holderShop)
         return {
           code: "xxxx",
