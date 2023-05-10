@@ -26,8 +26,9 @@ class SuccessResponse {
 }
 
 class OkResponse extends SuccessResponse {
-  constructor({ message, metadata }) {
+  constructor({ message, metadata, options }) {
     super({ message, metadata });
+    this.options = options;
   }
 }
 
