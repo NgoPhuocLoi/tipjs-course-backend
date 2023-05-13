@@ -14,6 +14,52 @@ const SHOP_ROLES = {
 };
 
 class AccessService {
+  static async logout({ keyStore }) {
+    const delKey = await KeyTokenService.deleteKeyById(keyStore._id);
+    console.log({ delKey });
+    return delKey;
+  }
+
+  static async login({ email, password, refreshToken = null }) {
+    const foundShop = await ShopService.findByEmail({ email });
+
+    if (!foundShop) throw new BadRequest("Shop not registered");
+
+    const match = await bcrypt.compare(password, foundShop.password);
+
+    if (!match) throw new AuthFailureError("Authentication Error");
+
+    const privateKey = crypto.randomBytes(64).toString("hex");
+    const publicKey = crypto.randomBytes(64).toString("hex");
+    // const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
+    //   modulusLength: 4096,
+    //   publicKeyEncoding: {
+    //     type: "pkcs1",
+    //     format: "pem",
+    //   },
+    //   privateKeyEncoding: {
+    //     type: "pkcs1",
+    //     format: "pem",
+    //   },
+    // });
+    const tokens = await generateTokensPair(
+      { shop: foundShop._id, email },
+      privateKey,
+      publicKey
+    );
+
+    await KeyTokenService.createKeyToken({
+      shop: foundShop._id,
+      publicKey,
+      privateKey,
+      refreshToken: tokens.refreshToken,
+    });
+
+    return {
+      shop: getInfoData(foundShop, ["name", "_id", "email"]),
+      tokens,
+    };
+  }
   static async signup({ name, email, password }) {
     const holderShop = await ShopService.findByEmail({ email });
     if (holderShop) throw new BadRequest("Shop have already existed");
@@ -67,38 +113,6 @@ class AccessService {
 
     return {
       shop: getInfoData(newShop, ["name", "_id", "email"]),
-      tokens,
-    };
-  }
-
-  static async login({ email, password, refreshToken = null }) {
-    const foundShop = await ShopService.findByEmail({ email });
-
-    if (!foundShop) throw new BadRequest("Shop not registered");
-
-    const match = await bcrypt.compare(password, foundShop.password);
-
-    if (!match) throw new AuthFailureError("Authentication Error");
-    // console.log({ match });
-    const privateKey = crypto.randomBytes(64).toString("hex");
-    const publicKey = crypto.randomBytes(64).toString("hex");
-
-    const tokens = await generateTokensPair(
-      { shop: foundShop._id, email },
-      privateKey,
-      publicKey,
-      refreshToken
-    );
-
-    await KeyTokenService.createKeyToken({
-      shop: foundShop._id,
-      publicKey,
-      privateKey,
-      refreshToken: tokens.refreshToken,
-    });
-
-    return {
-      shop: getInfoData(foundShop, ["name", "_id", "email"]),
       tokens,
     };
   }

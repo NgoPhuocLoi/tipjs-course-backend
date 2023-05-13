@@ -27,6 +27,14 @@ class KeyTokenService {
       return error;
     }
   }
+
+  static async findByShopId(shopId) {
+    return await KeyToken.findOne({ shop: shopId }).lean();
+  }
+
+  static async deleteKeyById(keyId) {
+    return await KeyToken.remove({ _id: keyId });
+  }
 }
 
 module.exports = KeyTokenService;

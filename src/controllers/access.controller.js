@@ -2,6 +2,12 @@ const { CreatedResponse, OkResponse } = require("../core/success.response");
 const AccessService = require("../services/access.service");
 
 class AccessController {
+  async logout(req, res) {
+    new OkResponse({
+      message: "Logout successfully",
+      metadata: await AccessService.logout({ keyStore: req.keyStore }),
+    }).send(res);
+  }
   async signup(req, res, next) {
     new CreatedResponse({
       message: "Register OK",

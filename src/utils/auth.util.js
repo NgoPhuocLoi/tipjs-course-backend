@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 
 const generateTokensPair = async (payload, privateKey, publicKey) => {
   try {
-    const accessToken = await jwt.sign(payload, privateKey, {
+    const accessToken = await jwt.sign(payload, publicKey, {
       expiresIn: "2d",
     });
 
