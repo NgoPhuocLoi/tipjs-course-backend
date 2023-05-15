@@ -62,7 +62,6 @@ const authentication = asyncHandler(async (req, res, next) => {
   console.log("refreshToken:: ", req.headers[HEADER.REFRESH_TOKEN]);
   // Added: check if headers has field: 'x-refresh-token' => accessToken expired, using refreshToken to generate new tokenPair
   if (req.headers[HEADER.REFRESH_TOKEN]) {
-    console.log("Here");
     const refreshToken = req.headers[HEADER.REFRESH_TOKEN];
 
     // decode refreshToken by using privateKey
@@ -86,6 +85,7 @@ const authentication = asyncHandler(async (req, res, next) => {
   if (shopId !== decoded.shop) throw new AuthFailureError("Invalid ShopId");
 
   req.keyStore = keyStore;
+  req.shop = decoded;
 
   return next();
 });
