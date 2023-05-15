@@ -12,7 +12,7 @@ class AccessController {
       }),
     }).send(res);
   }
-  // something
+  // somethingdads
   async logout(req, res) {
     new OkResponse({
       message: "Logout successfully",
