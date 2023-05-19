@@ -2,10 +2,13 @@ const {
   ProductModel,
   ClothingModel,
   ElectronicModel,
+  FurnitureModel,
 } = require("../models/product.model");
 const { BadRequest } = require("../core/error.response");
 class ProductFactory {
-  static async createProduct(type, payload) {
+  // this method need open and edit the code when adding new product type => violate the SOLID principle (open-closed)
+
+  /*static async createProduct(type, payload) {
     switch (type) {
       case "Clothing":
         return await new Clothing(payload).createProduct();
@@ -14,6 +17,22 @@ class ProductFactory {
       default:
         throw new BadRequest("Invalid product's type!");
     }
+  }*/
+
+  // new createProduct method using strategy pattern
+  static productRegistry = {};
+
+  static registerProductType(type, classRef) {
+    console.log(ProductFactory.productRegistry);
+    ProductFactory.productRegistry[type] = classRef;
+  }
+
+  static async createProduct(type, payload) {
+    const productClass = ProductFactory.productRegistry[type];
+
+    if (!productClass) throw new BadRequest("Invalid product's type!");
+
+    return await new productClass(payload).createProduct();
   }
 }
 
@@ -84,5 +103,29 @@ class Electronic extends Product {
     return prod;
   }
 }
+
+class Furniture extends Product {
+  async createProduct() {
+    const furnitureProd = await FurnitureModel.create({
+      ...this.product_attributes,
+      product_shop: this.product_shop,
+    });
+
+    if (!furnitureProd)
+      throw new BadRequest("An error occurs when creating furniture product!");
+
+    const prod = await super.createProduct(furnitureProd._id);
+    if (!prod) {
+      await FurnitureModel.findByIdAndDelete(furnitureProd._id);
+      throw new BadRequest("An error occurs when creating furniture product!");
+    }
+
+    return prod;
+  }
+}
+
+ProductFactory.registerProductType("Clothing", Clothing);
+ProductFactory.registerProductType("Electronic", Electronic);
+ProductFactory.registerProductType("Furniture", Furniture);
 
 module.exports = ProductFactory;
