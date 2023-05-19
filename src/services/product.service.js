@@ -5,6 +5,8 @@ const {
   FurnitureModel,
 } = require("../models/product.model");
 const { BadRequest } = require("../core/error.response");
+const productRepo = require("../models/repositories/product.repo");
+
 class ProductFactory {
   // this method need open and edit the code when adding new product type => violate the SOLID principle (open-closed)
 
@@ -34,6 +36,30 @@ class ProductFactory {
 
     return await new productClass(payload).createProduct();
   }
+
+  // ========== QUERY ============= //
+
+  static async findAllDraftsForShop({ shopId, limit = 50, skip = 0 }) {
+    return await productRepo.findAllDraftsForShop({ shopId, limit, skip });
+  }
+
+  static async findAllPublishedForShop({ shopId, limit = 50, skip = 0 }) {
+    return await productRepo.findAllPublishedForShop({ shopId, limit, skip });
+  }
+
+  static async searchProducts({ textSearch }) {
+    return await productRepo.searchProductsByUser({ textSearch });
+  }
+
+  //=================================//
+
+  //========= PUT ==================//
+  static async publishProductByShop({ shopId, productId }) {
+    return await productRepo.publishProductByShop({ shopId, productId });
+  }
+  static async unPublishProductByShop({ shopId, productId }) {
+    return await productRepo.unPublishProductByShop({ shopId, productId });
+  }
 }
 
 // Define base product class
@@ -47,6 +73,7 @@ class Product {
     product_type,
     product_shop,
     product_attributes,
+    product_ratingsAverage,
   }) {
     this.product_name = product_name;
     this.product_thumb = product_thumb;
@@ -56,6 +83,7 @@ class Product {
     this.product_type = product_type;
     this.product_shop = product_shop;
     this.product_attributes = product_attributes;
+    this.product_ratingsAverage = product_ratingsAverage;
   }
 
   async createProduct(productId) {
