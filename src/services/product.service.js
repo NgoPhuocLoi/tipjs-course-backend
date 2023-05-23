@@ -25,7 +25,6 @@ class ProductFactory {
   static productRegistry = {};
 
   static registerProductType(type, classRef) {
-    console.log(ProductFactory.productRegistry);
     ProductFactory.productRegistry[type] = classRef;
   }
 
@@ -49,6 +48,26 @@ class ProductFactory {
 
   static async searchProducts({ textSearch }) {
     return await productRepo.searchProductsByUser({ textSearch });
+  }
+
+  static async findAllProducts({
+    filter = { isPublished: true },
+    limit = 50,
+    page = 1,
+    sort = "ctime",
+    select = ["product_name", "product_thumb", "product_price"],
+  }) {
+    return await productRepo.findAllProducts({
+      filter,
+      limit,
+      page,
+      sort,
+      select,
+    });
+  }
+
+  static async findOneProduct({ product_id, unselect = ["__v", "updatedAt"] }) {
+    return productRepo.findOneProduct({ product_id, unselect });
   }
 
   //=================================//

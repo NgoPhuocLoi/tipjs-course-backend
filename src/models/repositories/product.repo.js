@@ -1,5 +1,5 @@
 const { ProductModel } = require("../product.model");
-
+const { getSelectData, unGetSelectData } = require("../../utils");
 const queryProducts = async ({ query, limit, skip }) => {
   return await ProductModel.find(query)
     .populate("product_shop", "name email -_id")
@@ -62,10 +62,30 @@ const searchProductsByUser = async ({ textSearch }) => {
   return results;
 };
 
+const findAllProducts = async ({ filter, limit, page, sort, select }) => {
+  const skip = (page - 1) * limit;
+  return ProductModel.find(filter)
+    .sort({
+      createdAt: sort === "ctime" ? -1 : 1,
+    })
+    .skip(skip)
+    .limit(limit)
+    .select(getSelectData(select))
+    .lean();
+};
+
+const findOneProduct = async ({ product_id, unselect }) => {
+  return ProductModel.findById(product_id)
+    .select(unGetSelectData(unselect))
+    .lean();
+};
+
 module.exports = {
   findAllDraftsForShop,
   findAllPublishedForShop,
   publishProductByShop,
   unPublishProductByShop,
   searchProductsByUser,
+  findAllProducts,
+  findOneProduct,
 };

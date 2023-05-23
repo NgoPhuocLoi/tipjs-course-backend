@@ -61,6 +61,23 @@ class ProductController {
       }),
     }).send(res);
   }
+
+  static async getAllProducts(req, res, next) {
+    new OkResponse({
+      message: "OK",
+      metadata: await ProductService.findAllProducts(req.query),
+    }).send(res);
+  }
+
+  static async getOneProduct(req, res, next) {
+    new OkResponse({
+      message: "OK",
+      metadata: await ProductService.findOneProduct({
+        product_id: req.params.productId,
+        unselect: req.query.unselect,
+      }),
+    }).send(res);
+  }
 }
 
 module.exports = ProductController;

@@ -12,6 +12,7 @@ class Database {
     if (dev) {
       mongoose.set("debug", true);
       mongoose.set("debug", { color: true });
+      mongoose.set("strictQuery", true);
     }
     mongoose
       .connect(process.env.MONGODB_URI)

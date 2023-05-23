@@ -4,6 +4,8 @@ const { asyncHandler } = require("../../helpers/handleError");
 const { authentication } = require("../../middlewares/auth");
 
 router.get("/search", asyncHandler(ProductController.searchProductsByUser));
+router.get("/", asyncHandler(ProductController.getAllProducts));
+router.get("/:productId", asyncHandler(ProductController.getOneProduct));
 
 router.use(authentication);
 
