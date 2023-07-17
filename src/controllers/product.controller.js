@@ -12,6 +12,20 @@ class ProductController {
     }).send(res);
   }
 
+  static async updateProduct(req, res, next) {
+    const productId = req.params.id;
+    new OkResponse({
+      message: "Update successfully",
+      metadata: await ProductService.updateProduct(
+        req.body.product_type,
+        productId,
+        {
+          ...req.body,
+        }
+      ),
+    }).send(res);
+  }
+
   static async findAllDraftsForShop(req, res, next) {
     const shopId = req.shop.shop;
     new OkResponse({

@@ -6,6 +6,7 @@ const {
 } = require("../models/product.model");
 const { BadRequest } = require("../core/error.response");
 const productRepo = require("../models/repositories/product.repo");
+const { updateNestedObjectParser } = require("../utils");
 
 class ProductFactory {
   // this method need open and edit the code when adding new product type => violate the SOLID principle (open-closed)
@@ -34,6 +35,12 @@ class ProductFactory {
     if (!productClass) throw new BadRequest("Invalid product's type!");
 
     return await new productClass(payload).createProduct();
+  }
+
+  static async updateProduct(type, productId, payload) {
+    const productClass = ProductFactory.productRegistry[type];
+    if (!productClass) throw new BadRequest("Invalid product's type!");
+    return await new productClass(payload).updateProduct(productId);
   }
 
   // ========== QUERY ============= //
@@ -108,6 +115,14 @@ class Product {
   async createProduct(productId) {
     return await ProductModel.create({ ...this, _id: productId });
   }
+
+  async updateProduct(productId, payload) {
+    return await productRepo.updateProductById({
+      productId,
+      payload,
+      Model: ProductModel,
+    });
+  }
 }
 // define subclass: Clothing, Electronic
 
@@ -129,6 +144,20 @@ class Clothing extends Product {
 
     return prod;
   }
+
+  async updateProduct(productId) {
+    const payload = updateNestedObjectParser(this);
+
+    if (payload.product_attributes) {
+      await productRepo.updateProductById({
+        productId,
+        payload,
+        Model: ClothingModel,
+      });
+    }
+
+    return await super.updateProduct(productId, payload);
+  }
 }
 
 class Electronic extends Product {
@@ -148,6 +177,21 @@ class Electronic extends Product {
     }
 
     return prod;
+  }
+
+  async updateProduct(productId) {
+    console.log("[1]::: ", this);
+    const payload = updateNestedObjectParser(this);
+    console.log("[2]::: ", payload);
+    if (payload.product_attributes) {
+      await productRepo.updateProductById({
+        productId,
+        payload,
+        Model: ElectronicModel,
+      });
+    }
+
+    return await super.updateProduct(productId, payload);
   }
 }
 
