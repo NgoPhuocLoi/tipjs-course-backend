@@ -5,7 +5,7 @@ const {
   FurnitureModel,
 } = require("../models/product.model");
 const { BadRequest } = require("../core/error.response");
-const productRepo = require("../models/repositories/product.repo");
+const { productRepo, inventoryRepo } = require("../models/repositories");
 const { updateNestedObjectParser } = require("../utils");
 
 class ProductFactory {
@@ -113,7 +113,17 @@ class Product {
   }
 
   async createProduct(productId) {
-    return await ProductModel.create({ ...this, _id: productId });
+    const newProduct = await ProductModel.create({ ...this, _id: productId });
+
+    if (newProduct) {
+      await inventoryRepo.insertInventory({
+        productId: newProduct._id,
+        shopId: this.product_shop,
+        stock: this.product_quantity,
+      });
+    }
+
+    return newProduct;
   }
 
   async updateProduct(productId, payload) {
