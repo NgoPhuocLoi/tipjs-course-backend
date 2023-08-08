@@ -13,7 +13,7 @@ const discountSchema = new Schema(
       default: "fixed_amount",
     },
     discount_value: { type: Number, required: true },
-    discount_code: { type: String, required: true },
+    discount_code: { type: String, required: true, unique: true },
     discount_startDate: { type: Date, required: true },
     discount_endDate: { type: Date, required: true },
     discount_maxUses: { type: Number, required: true },
