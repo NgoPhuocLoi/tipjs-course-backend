@@ -62,7 +62,7 @@ class ProductFactory {
     limit = 50,
     page = 1,
     sort = "ctime",
-    select = ["product_name", "product_thumb", "product_price"],
+    select = ["product_name", "product_thumb", "product_price", "product_shop"],
   }) {
     return await productRepo.findAllProducts({
       filter,
