@@ -90,6 +90,14 @@ const updateProductById = async ({
   return await Model.findByIdAndUpdate(productId, payload, { new: isNew });
 };
 
+const getReviewProducts = async (items_products) => {
+  return await Promise.all(
+    items_products.map(async (product) => {
+      return await ProductModel.findById(product.productId).lean();
+    })
+  );
+};
+
 module.exports = {
   findAllDraftsForShop,
   findAllPublishedForShop,
@@ -99,4 +107,5 @@ module.exports = {
   findAllProducts,
   findOneProduct,
   updateProductById,
+  getReviewProducts,
 };

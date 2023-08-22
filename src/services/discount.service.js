@@ -140,11 +140,11 @@ class DiscountService {
       discount_minOrderValue,
       discount_value,
     } = foundDiscount;
-    if (
-      new Date() < new Date(discount_startDate) ||
-      new Date() > new Date(discount_endDate)
-    )
-      throw new BadRequest("Discount code is expired!");
+    // if (
+    //   new Date() < new Date(discount_startDate) ||
+    //   new Date() > new Date(discount_endDate)
+    // )
+    //   throw new BadRequest("Discount code is expired!");
 
     if (discount_maxUses === 0)
       throw new BadRequest("Discount code has been used up!");
