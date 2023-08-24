@@ -1,7 +1,7 @@
 const { Schema, Types, model } = require("mongoose");
 
 const DOCUMENT_NAME = "Inventory";
-const COLLECTION_NAME = "Inventories";
+const COLLECTION_NAME = "inventories";
 
 const inventorySchema = new Schema(
   {
@@ -21,7 +21,7 @@ const inventorySchema = new Schema(
       type: String,
       default: "unKnow",
     },
-    inven_reservation: {
+    inven_reservations: {
       type: Array,
       default: [],
     },

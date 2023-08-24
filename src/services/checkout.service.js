@@ -1,7 +1,10 @@
 const { NotFoundError, BadRequest } = require("../core/error.response");
 const CartModel = require("../models/cart.model");
+const OrderModel = require("../models/order.model");
 const { productRepo } = require("../models/repositories");
 const DiscountService = require("./discount.service");
+
+const redisService = require("./redis.service");
 
 class CheckoutService {
   /* Given the data from frontend: 
@@ -90,6 +93,58 @@ class CheckoutService {
     checkoutOrder.finalPrice =
       checkoutOrder.totalPrice - checkoutOrder.totalDiscount;
     return { checkoutOrder, shop_order_ids_new };
+  }
+
+  static async checkoutFinal({
+    cartId,
+    userId,
+    shop_order_ids,
+    user_address = {},
+    user_payment = {},
+  }) {
+    const { checkoutOrder, shop_order_ids_new } = await this.checkoutReview({
+      cartId,
+      userId,
+      shop_order_ids,
+    });
+
+    const products = shop_order_ids_new.flatMap((order) => order.item_products);
+
+    console("products :: " + products);
+    let reservationProductSuccess = true;
+    products.forEach((product) => async () => {
+      const { productId, quantity } = product;
+      const keyLock = await redisService.acquireLock({
+        productId,
+        quantity,
+        cartId,
+      });
+      reservationProductSuccess = reservationProductSuccess && !!keyLock;
+
+      if (keyLock) {
+        await redisService.releaseLock(keyLock);
+      }
+    });
+
+    if (!reservationProductSuccess) {
+      throw new BadRequest(
+        "Some products have been changed! Please order again!"
+      );
+    }
+
+    const order = await OrderModel.create({
+      order_userId: userId,
+      order_checkout: checkoutOrder,
+      order_products: shop_order_ids_new,
+      order_shippingInfo: user_address,
+      order_paymentInfo: user_payment,
+    });
+
+    if (order) {
+      // remove products in cart
+    }
+
+    return { order };
   }
 }
 
