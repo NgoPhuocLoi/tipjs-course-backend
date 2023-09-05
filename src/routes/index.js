@@ -1,8 +1,12 @@
 const router = require("express").Router();
 const { apiKey, permission } = require("../middlewares/auth");
+const { sendLogToDiscord } = require("../middlewares/logger");
 
 // check ApiKey
 router.use(apiKey);
+
+//logger
+router.use(sendLogToDiscord);
 
 //check permissions
 router.use(permission("0000"));
