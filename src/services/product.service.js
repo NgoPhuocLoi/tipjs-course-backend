@@ -7,6 +7,7 @@ const {
 const { BadRequest } = require("../core/error.response");
 const { productRepo, inventoryRepo } = require("../models/repositories");
 const { updateNestedObjectParser } = require("../utils");
+const NotificationService = require("./notification.service");
 
 class ProductFactory {
   // this method need open and edit the code when adding new product type => violate the SOLID principle (open-closed)
@@ -121,6 +122,20 @@ class Product {
         shopId: this.product_shop,
         stock: this.product_quantity,
       });
+
+      NotificationService.pushNotification({
+        type: "SHOP-001",
+        senderId: this.product_shop,
+        receiverId: 1,
+        options: {
+          productName: this.product_name,
+          shop: this.product_shop,
+        },
+      })
+        .then((rs) => {
+          console.log(rs);
+        })
+        .catch((err) => console.log(err));
     }
 
     return newProduct;
